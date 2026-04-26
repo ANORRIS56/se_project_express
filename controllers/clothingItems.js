@@ -1,10 +1,14 @@
 const ClothingItem = require("../models/clothingItem");
 
+const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
     .catch(() =>
-      res.status(500).send({ message: "An error has occurred on the server." }),
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." })
     );
 };
 
@@ -20,10 +24,11 @@ const createItem = (req, res) => {
     .then((item) => res.status(201).send(item))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
+
       return res
-        .status(500)
+        .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -32,16 +37,18 @@ const deleteItem = (req, res) => {
   ClothingItem.findByIdAndDelete(req.params.id)
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
       }
+
       return res
-        .status(500)
+        .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -50,20 +57,22 @@ const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
       }
+
       return res
-        .status(500)
+        .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -72,20 +81,22 @@ const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.id,
     { $pull: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
       return res.send(item);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid item id" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
       }
+
       return res
-        .status(500)
+        .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
     });
 };
