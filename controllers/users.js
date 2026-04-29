@@ -64,7 +64,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  // 🔥 FIX FOR YOUR FAILING TEST
+  // FIX FOR TESTS (missing fields must return 400)
   if (!email || !password) {
     return res.status(BAD_REQUEST).send({
       message: "Email and password are required",
@@ -104,8 +104,8 @@ const login = (req, res) => {
 };
 
 // GET CURRENT USER
-const getCurrentUser = (req, res) => {
-  return User.findById(req.user._id)
+const getCurrentUser = (req, res) =>
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({
@@ -126,7 +126,6 @@ const getCurrentUser = (req, res) => {
         message: "An error has occurred on the server.",
       });
     });
-};
 
 // UPDATE USER
 const updateCurrentUser = (req, res) => {
