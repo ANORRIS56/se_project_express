@@ -40,7 +40,7 @@ const createUser = (req, res) => {
       }
 
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
 
       return res
@@ -121,7 +121,7 @@ const updateCurrentUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
 
       if (err.name === "CastError") {
