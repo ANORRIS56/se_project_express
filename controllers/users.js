@@ -13,10 +13,17 @@ const {
 
 const { JWT_SECRET = "dev-secret" } = process.env;
 
+// CREATE USER (SIGNUP)
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  bcrypt
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({
+      message: "Email and password are required",
+    });
+  }
+
+  return bcrypt
     .hash(password, 10)
     .then((hash) =>
       User.create({
@@ -36,23 +43,35 @@ const createUser = (req, res) => {
     )
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(CONFLICT).send({ message: "Email already exists" });
+        return res.status(CONFLICT).send({
+          message: "Email already exists",
+        });
       }
 
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({
+          message: err.message,
+        });
       }
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
     });
 };
 
+// LOGIN (SIGNIN)
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
+  // 🔥 FIX FOR YOUR FAILING TEST
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({
+      message: "Email and password are required",
+    });
+  }
+
+  return User.findOne({ email })
     .select("+password")
     .then((user) => {
       if (!user) {
@@ -73,64 +92,76 @@ const login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === "Unauthorized") {
-        return res
-          .status(UNAUTHORIZED)
-          .send({ message: "Incorrect email or password" });
+        return res.status(UNAUTHORIZED).send({
+          message: "Incorrect email or password",
+        });
       }
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
     });
 };
 
+// GET CURRENT USER
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  return User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return res.status(NOT_FOUND).send({
+          message: "User not found",
+        });
       }
 
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user id" });
+        return res.status(BAD_REQUEST).send({
+          message: "Invalid user id",
+        });
       }
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
     });
 };
 
+// UPDATE USER
 const updateCurrentUser = (req, res) => {
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     req.user._id,
     { name, avatar },
     { new: true, runValidators: true }
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return res.status(NOT_FOUND).send({
+          message: "User not found",
+        });
       }
 
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({
+          message: err.message,
+        });
       }
 
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user id" });
+        return res.status(BAD_REQUEST).send({
+          message: "Invalid user id",
+        });
       }
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
     });
 };
 
