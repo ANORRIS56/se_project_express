@@ -17,9 +17,10 @@ const { JWT_SECRET = "dev-secret" } = process.env;
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  if (!email || !password) {
+  // 🔥 FIX (reviewer request)
+  if (!name || !password) {
     return res.status(BAD_REQUEST).send({
-      message: "Email and password are required",
+      message: "Name and password are required",
     });
   }
 
@@ -64,7 +65,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  // FIX FOR TESTS (missing fields must return 400)
+  // 🔥 REQUIRED for tests
   if (!email || !password) {
     return res.status(BAD_REQUEST).send({
       message: "Email and password are required",
