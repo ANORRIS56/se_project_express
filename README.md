@@ -28,4 +28,4 @@ Run the development server:
 npm run dev
 ```
 
-https://www.loom.com/share/0d9b32b2361f4d9db1e3301f530ae5cf
+Project Pitch Video https://drive.google.com/file/d/1Scs7aeN2k6Z-XNFFZYf4ByiuNXOWNoWk/view?usp=drive_link
