@@ -27,3 +27,5 @@ Run the development server:
 ```bash
 npm run dev
 ```
+
+https://www.loom.com/share/0d9b32b2361f4d9db1e3301f530ae5cf
