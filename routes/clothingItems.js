@@ -1,7 +1,6 @@
 const express = require('express');
 
 const {
-  getItems,
   createItem,
   deleteItem,
   likeItem,
@@ -14,8 +13,6 @@ const {
 } = require('../middlewares/validation');
 
 const router = express.Router();
-
-router.get('/items', getItems);
 
 router.post('/items', validateClothingItem, createItem);
 

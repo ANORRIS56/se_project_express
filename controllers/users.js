@@ -2,23 +2,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-
 const BadRequestError = require('../errors/bad-request-err');
-const UnauthorizedError = require('../errors/unauthorized-err');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
 
 const { JWT_SECRET } = require('../utils/config');
 
-// CREATE USER (SIGNUP)
 const createUser = (req, res, next) => {
   const {
     name, avatar, email, password,
   } = req.body;
-
-  if (!name || !password) {
-    return next(new BadRequestError('Name and password are required'));
-  }
 
   return bcrypt
     .hash(password, 10)
@@ -38,63 +31,37 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new ConflictError('Email already exists'));
       }
-
       if (err.name === 'ValidationError') {
         return next(new BadRequestError(err.message));
       }
-
       return next(err);
     });
 };
 
-// LOGIN (SIGNIN)
+// FIXED LOGIN (uses model method)
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return next(new BadRequestError('Email and password are required'));
-  }
-
-  return User.findOne({ email })
-    .select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new UnauthorizedError('Incorrect email or password');
-      }
-
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          throw new UnauthorizedError('Incorrect email or password');
-        }
-
-        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-          expiresIn: '7d',
-        });
-
-        return res.send({ token });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: '7d',
       });
+
+      return res.send({ token });
     })
     .catch(next);
 };
 
-// GET CURRENT USER
 const getCurrentUser = (req, res, next) => User.findById(req.user._id)
   .then((user) => {
     if (!user) {
       throw new NotFoundError('User not found');
     }
-
     return res.send(user);
   })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      return next(new BadRequestError('Invalid user id'));
-    }
+  .catch(next);
 
-    return next(err);
-  });
-
-// UPDATE USER
 const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
@@ -107,16 +74,9 @@ const updateCurrentUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('User not found');
       }
-
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return next(new BadRequestError(err.message));
-      }
-
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports = {
